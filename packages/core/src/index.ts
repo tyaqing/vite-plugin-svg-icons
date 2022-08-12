@@ -126,7 +126,7 @@ export async function createModuleCode(
   const code = `
        if (typeof window !== 'undefined') {
          function loadSvg() {
-           var body = document.body;
+           var body = document.body.querySelector('#shadow-root').shadowRoot;
            var svgDom = document.getElementById('${options.customDomId}');
            if(!svgDom) {
              svgDom = document.createElementNS('${XMLNS}', 'svg');
@@ -140,11 +140,18 @@ export async function createModuleCode(
            svgDom.innerHTML = ${JSON.stringify(html)};
            ${domInject(options.inject)}
          }
-         if(document.readyState === 'loading') {
-           document.addEventListener('DOMContentLoaded', loadSvg);
-         } else {
-           loadSvg()
-         }
+         var timer =  setInterval(()=>{
+              var sd = document.body.querySelector('#shadow-root')
+              if(sd){
+                loadSvg()
+                clearInterval(timer)
+              }
+          },500)
+         // if(document.readyState === 'loading') {
+         //   document.addEventListener('DOMContentLoaded', loadSvg);
+         // } else {
+         //   loadSvg()
+         // }
       }
         `
   return {
